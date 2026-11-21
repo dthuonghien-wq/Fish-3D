@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cá Phiêu Lưu">
+<meta name="theme-color" content="#06203a">
+<link rel="manifest" href="manifest.json">
+<title>Cá Phiêu Lưu 3D</title>
+<style>
+body{margin:0;background:#06203a;color:#fff;font-family:-apple-system,system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 12px);height:100vh;height:100dvh;box-sizing:border-box;-webkit-user-select:none;user-select:none;overscroll-behavior:none;overflow:hidden;touch-action:none}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:480px;flex:none}
+.stat{background:#0f3354;border-radius:10px;padding:7px 10px}
+.stat small{color:#9cc6e6;font-size:12px}
+.stat div{font-size:20px;font-weight:600}
+#wrap{position:relative;width:100%;max-width:480px;flex:1 1 auto;min-height:0;touch-action:none;overflow:hidden;border-radius:12px}
+#wrap canvas{display:block;width:100%;height:100%}
+#ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(3,15,35,.62);z-index:5;overflow-y:auto}
+#msg{font-size:16px;font-weight:600;text-align:center;padding:0 18px;line-height:1.55}
+#msg small{font-size:14px;font-weight:500;color:#cfe6f7}
+#lvb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:800;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.7);opacity:0;transform:scale(.8);transition:all .3s;pointer-events:none;z-index:3;text-align:center;line-height:1.25}
+#vg{position:absolute;inset:0;pointer-events:none;z-index:2;opacity:0;transition:opacity .3s;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 45%,rgba(255,40,40,.55) 100%)}
+#fl{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:2}
+#lbls{position:absolute;inset:0;pointer-events:none;z-index:2}
+.lb{position:absolute;transform:translate(-50%,-100%);font-weight:900;font-size:15px;color:#fff;-webkit-text-stroke:1px rgba(0,0,0,.8);text-shadow:0 2px 4px rgba(0,0,0,.6);white-space:nowrap;display:none}
+.lb.me{font-size:22px;color:#FFE36B}
+.ind{position:absolute;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:rgba(3,15,35,.7);border:2px solid #fff;display:none;text-align:center;z-index:3}
+.ind b{position:absolute;left:50%;top:50%;margin:-11px 0 0 -8px;font-size:18px;line-height:22px;transform-origin:8px 11px}
+.ind span{font-size:19px;line-height:34px}
+.ind i{position:absolute;left:50%;top:100%;transform:translateX(-50%);font-style:normal;font-size:11px;font-weight:800;white-space:nowrap;text-shadow:0 1px 3px #000}
+.ind.boss{border-color:#FF3344;box-shadow:0 0 14px #FF3344;animation:ip .6s infinite alternate}.ind.boss b,.ind.boss i{color:#FF5A5A}
+.ind.bad{width:30px;height:30px;border-color:#FF7A7A}.ind.bad span{font-size:15px;line-height:26px}.ind.bad b{color:#FF7A7A}
+.ind.warn{border-color:#FFB060}.ind.warn b{color:#FFB060}
+.ind.gold{border-color:#FFD700;box-shadow:0 0 10px #FFD700}.ind.gold b,.ind.gold i{color:#FFD700}
+@keyframes ip{to{transform:translate(-50%,-50%) scale(1.15)}}
+.lb.ok{color:#8BFFB0}.lb.bad{color:#FF7A7A}.lb.boss{font-size:20px;color:#FF5A5A}
+.pp{position:absolute;transform:translate(-50%,-50%);font-weight:900;font-size:24px;color:#fff;-webkit-text-stroke:1.5px rgba(5,10,30,.85);text-shadow:0 3px 8px rgba(0,0,0,.6);pointer-events:none;z-index:3;white-space:nowrap;animation:up 1s ease-out forwards}
+@keyframes up{0%{opacity:1;transform:translate(-50%,-50%) scale(.5)}15%{opacity:1;transform:translate(-50%,-80%) scale(1.3)}30%{transform:translate(-50%,-100%) scale(1)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-220%) scale(1)}}
+#pw{position:absolute;top:8px;left:8px;display:flex;flex-wrap:wrap;gap:6px;z-index:3;pointer-events:none;max-width:calc(100% - 120px)}
+#pw span{background:rgba(3,15,35,.72);border-radius:14px;padding:3px 9px;font-size:14px;font-weight:700}
+.tb{position:absolute;top:8px;z-index:6;width:42px;height:42px;font-size:18px;background:rgba(3,15,35,.6);border-radius:12px}
+#ps{right:8px;display:none}
+#mu{right:56px}
+#joy{position:absolute;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);z-index:3;pointer-events:none;display:none}
+#knob{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(255,255,255,.45)}
+#sk{position:absolute;right:8px;bottom:12px;display:none;width:116px;display:flex;flex-wrap:wrap-reverse;justify-content:flex-end;gap:8px;z-index:4}
+#sk button{width:54px;height:54px;border-radius:50%;font-size:25px;background:rgba(10,40,70,.88);border:2px solid rgba(255,255,255,.3);position:relative;overflow:hidden;padding:0}
+#sk button i{position:absolute;inset:0;border-radius:50%;background:conic-gradient(rgba(0,0,0,.7) var(--p,0%),transparent 0);pointer-events:none}
+#sk button.rd{border-color:#7FF;box-shadow:0 0 12px rgba(127,255,255,.7)}
+button{font-size:22px;border:0;border-radius:10px;background:#1b4a72;color:#fff;touch-action:manipulation}
+button:active{filter:brightness(1.25)}
+#st{font-size:17px;padding:10px 26px;background:#1D9E75}
+#skins{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:0 10px}
+#skins button{font-size:13px;padding:7px 10px;background:#1b4a72}
+#skins button.on{background:#1D9E75;box-shadow:0 0 0 2px #fff}
+#skins small{width:100%;text-align:center;color:#cfe6f7;font-size:13px}
+#bb{position:absolute;left:50%;top:56px;transform:translateX(-50%);width:66%;z-index:3;pointer-events:none;display:none;text-align:center}
+#bbn{font-size:13px;font-weight:800;color:#FFD0D0;text-shadow:0 1px 4px #000;margin-bottom:3px}
+#bbw{height:11px;border-radius:6px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.35);overflow:hidden}
+#bbf{height:100%;width:100%;background:linear-gradient(90deg,#FF3344,#FF9F1C);transition:width .2s}
+#tr{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .8s;background:radial-gradient(circle at 50% 40%,#2a8ab0,#04182e 75%);overflow:hidden}
+#tr.on{opacity:1}
+#tr i{position:absolute;bottom:-40px;border-radius:50%;border:2px solid rgba(220,250,255,.7);background:rgba(255,255,255,.12);animation:bu 1.6s linear infinite}
+@keyframes bu{to{transform:translateY(-130vh)}}
+#hint{flex:none;font-size:13px;color:#7fb0d6;text-align:center}
+</style>
+</head>
+<body>
+<div class="stats">
+  <div class="stat"><small>Điểm</small><div id="sc">0</div></div>
+  <div class="stat"><small>Kỷ lục</small><div id="bs">0</div></div>
+  <div class="stat"><small>Vùng</small><div id="lv">1</div></div>
+  <div class="stat"><small>Mạng</small><div id="lf">❤️3</div></div>
+</div>
+<div id="wrap">
+  <div id="lbls"></div>
+  <div id="vg"></div>
+  <div id="fl"></div>
+  <div id="pw"></div>
+  <div id="lvb"></div>
+  <div id="joy"><div id="knob"></div></div>
+  <div id="sk"></div>
+  <div id="bb"><div id="bbn"></div><div id="bbw"><div id="bbf"></div></div></div>
+  <div id="tr"><i style="left:32%;width:18px;height:18px;animation-delay:-0.59s;animation-duration:1.76s"></i><i style="left:82%;width:14px;height:14px;animation-delay:-0.97s;animation-duration:2.10s"></i><i style="left:62%;width:26px;height:26px;animation-delay:-0.88s;animation-duration:1.31s"></i><i style="left:93%;width:40px;height:40px;animation-delay:-0.87s;animation-duration:1.70s"></i><i style="left:52%;width:19px;height:19px;animation-delay:-0.37s;animation-duration:1.27s"></i><i style="left:68%;width:34px;height:34px;animation-delay:-1.19s;animation-duration:1.84s"></i><i style="left:10%;width:20px;height:20px;animation-delay:-1.21s;animation-duration:1.75s"></i><i style="left:40%;width:11px;height:11px;animation-delay:-1.32s;animation-duration:1.40s"></i><i style="left:78%;width:34px;height:34px;animation-delay:-1.14s;animation-duration:2.11s"></i><i style="left:52%;width:38px;height:38px;animation-delay:-1.54s;animation-duration:1.25s"></i><i style="left:48%;width:16px;height:16px;animation-delay:-0.06s;animation-duration:1.64s"></i><i style="left:35%;width:37px;height:37px;animation-delay:-1.25s;animation-duration:2.04s"></i><i style="left:55%;width:42px;height:42px;animation-delay:-1.33s;animation-duration:1.73s"></i><i style="left:70%;width:36px;height:36px;animation-delay:-0.93s;animation-duration:2.09s"></i><i style="left:89%;width:11px;height:11px;animation-delay:-1.37s;animation-duration:2.19s"></i><i style="left:87%;width:20px;height:20px;animation-delay:-1.12s;animation-duration:1.46s"></i></div>
+  <button id="mu" class="tb">🔊</button>
+  <button id="ps" class="tb">⏸</button>
+  <div id="ov">
+    <div id="msg">🐠 <b>CÁ PHIÊU LƯU 3D</b><br><small>Kéo ngón tay bất kỳ đâu để bơi.<br>Ăn cá có vòng <b style="color:#8BFFB0">XANH</b> để lớn lên · Né cá vòng <b style="color:#FF7A7A">ĐỎ</b><br>Ăn liên tiếp để nhân <b>combo x6</b><br>🧬 <b>8 lần tiến hoá</b>: Cá con → Cá hề → Cá nóc → Cá kiếm → Cá mập → Cá voi sát thủ → Rồng biển → Thần long<br>Mỗi lần tiến hoá mở 1 kỹ năng: ⚡🫧🐡🔱🌀🌊👥🐲<br>👑 Đủ điểm thì <b>Trùm</b> xuất hiện: húc vào <b>sườn/đuôi</b>, tránh miệng. Hạ trùm để sang vùng biển mới · <b>10 vùng · 10 trùm</b><br>💰 Tìm <b>rương kho báu</b> và nhặt <b>đồng vàng</b>, mũi tên vàng ở mép màn hình chỉ hướng<br>🔴 Mũi tên đỏ chỉ hướng Trùm · ❗ cá đang đuổi theo bạn<br>⚠️ Cẩn thận lưỡi câu 🎣, sứa 🪼, lưới 🕸️, xoáy nước 🌀<br>🎁 Mỗi 3000 điểm +1 ❤️</small></div>
+    <div id="skins"></div>
+    <button id="st">Bắt đầu</button>
+  </div>
+</div>
+<div id="hint">👆 Kéo để bơi · Nút tròn: kỹ năng</div>
+<script>
+function drawFishIcon(S){const c=document.createElement('canvas');c.width=c.height=S;const g=c.getContext('2d'),k=S/512;g.scale(k,k);
+const gr=g.createLinearGradient(0,0,0,512);gr.addColorStop(0,'#13A3C8');gr.addColorStop(1,'#062244');g.fillStyle=gr;g.fillRect(0,0,512,512);
+g.fillStyle='rgba(255,255,255,.09)';for(let i=0;i<4;i++){g.beginPath();g.moveTo(70+i*120,0);g.lineTo(135+i*120,0);g.lineTo(35+i*120,512);g.lineTo(-30+i*120,512);g.fill()}
+g.fillStyle='#E9C46A';g.beginPath();g.moveTo(0,512);g.lineTo(0,440);g.quadraticCurveTo(256,395,512,445);g.lineTo(512,512);g.fill();
+[[70,440,'#FF6F91'],[440,445,'#B04DFF'],[120,452,'#FF9F1C']].forEach(([x,y,col])=>{g.fillStyle=col;g.beginPath();g.arc(x,y,26,Math.PI,0);g.fill();g.fillRect(x-7,y-50,14,50);g.beginPath();g.arc(x,y-52,15,0,7);g.fill()});
+g.save();g.translate(256,240);g.rotate(-0.12);
+g.fillStyle='#FF8A1E';g.beginPath();g.moveTo(-120,0);g.lineTo(-205,-80);g.lineTo(-185,0);g.lineTo(-205,80);g.closePath();g.fill();
+g.beginPath();g.moveTo(-30,-95);g.quadraticCurveTo(20,-160,70,-92);g.fill();g.beginPath();g.moveTo(-10,92);g.quadraticCurveTo(25,140,55,90);g.fill();
+g.fillStyle='#FFB347';g.beginPath();g.ellipse(0,0,150,105,0,0,7);g.fill();
+g.fillStyle='#FFF1D6';g.beginPath();g.ellipse(15,40,110,52,0,0,Math.PI);g.fill();
+g.fillStyle='#fff';[-55,15].forEach(x=>{g.beginPath();g.ellipse(x,0,14,98,0,0,7);g.fill()});
+g.fillStyle='#fff';g.beginPath();g.arc(82,-28,30,0,7);g.fill();g.fillStyle='#0A1830';g.beginPath();g.arc(90,-26,15,0,7);g.fill();g.fillStyle='#fff';g.beginPath();g.arc(95,-32,5,0,7);g.fill();
+g.strokeStyle='#7a3a00';g.lineWidth=6;g.lineCap='round';g.beginPath();g.arc(118,20,16,0.2,1.6);g.stroke();
+g.fillStyle='#FFD700';g.beginPath();g.moveTo(-25,-102);g.lineTo(-15,-150);g.lineTo(5,-118);g.lineTo(25,-158);g.lineTo(42,-118);g.lineTo(62,-148);g.lineTo(65,-96);g.closePath();g.fill();g.restore();
+g.fillStyle='rgba(220,248,255,.8)';[[400,120,16],[430,80,10],[452,40,7],[380,170,8],[90,110,9],[60,150,6]].forEach(([x,y,r])=>{g.beginPath();g.arc(x,y,r,0,7);g.fill()});
+return c}
+(function(){const u=drawFishIcon(180).toDataURL('image/png');[['apple-touch-icon',u],['icon',u]].forEach(([r,h])=>{const l=document.createElement('link');l.rel=r;l.href=h;document.head.appendChild(l)})})();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
